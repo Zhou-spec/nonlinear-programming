@@ -31,13 +31,17 @@ def wolfe_line_search(f, f_grad, x_curr, p_curr, c1, c2):
 
 ##############################################################################################################
 # implementation of gradient descent method
-def gradient_descent(f, f_grad, x_init, tao, c, max_iter):
+def gradient_descent(f, f_grad, x_init, line_search_method = 'armijo', tao = 0.5, c1 = 1e-4, c2=0.9, threshold = 1e-9, max_iter = 1000):
     x_curr = x_init
     for i in range(max_iter):
         p_curr = -f_grad(x_curr)
-        alpha = armijo_line_search(f, f_grad, x_curr, tao, c)
+        alpha = 1.0
+        if line_search_method == 'armijo':
+            alpha = armijo_line_search(f, f_grad, x_curr, tao, c1)
+        elif line_search_method == 'wolfe':
+            alpha = wolfe_line_search(f, f_grad, x_curr, p_curr, c1, c2)
         x_curr = x_curr + alpha * p_curr
-    return x_curr
+    return x_curr, f(x_curr)
 
 
 ##############################################################################################################

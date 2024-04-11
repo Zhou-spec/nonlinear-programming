@@ -25,8 +25,7 @@ def problem10_obj():
 from decimal import Decimal
     
 
-
-def runcase(Obj, xinit, casenumber = 1, Objname = 'OptObj', methodlist = ['BFGS','L-BFGS','Newton-CG'], make_table = True):
+def runcase(Obj, xinit, Objname = 'OptObj', line_search_method = 'Armijo', methodlist = ['gradient_descend', 'BFGS','L-BFGS','Newton-CG', 'modified_Newton'], make_table = True):
     # Run the optimization for one Obj using three methods: gradient descend, Newton, modified Newton
     
     # Create an outputfile with name Objname, in subdirectory '/result'
@@ -37,17 +36,14 @@ def runcase(Obj, xinit, casenumber = 1, Objname = 'OptObj', methodlist = ['BFGS'
     outputfile_list = []    
     outinfo_list = []
     for method in methodlist:
-        if Objname == 'Rosenbrock 7' and (method == 'BFGS' or method == 'L-BFGS'):
-            print("Skip rosenbrock 7 with " + str(method) + " .")
-            continue
         
         myobj.method = method
-        if method == 'Newton-CG' or method == 'BFGS' or method == 'L-BFGS':
-            myobj.linesearch_options.method = 'Wolfe'
+        myobj.linesearch_options.method = line_search_method 
         
-        elif method == 'gradient_descend' or method == 'Newton' or method == 'modified_Newton':
-            myobj.linesearch_options.method = 'Armijo'
-        outputfile = 'result/' + Objname + '_' + method + '.txt'
+        if line_search_method == 'Armijo':
+            outputfile = 'result/' + Objname + '_' + method + '_Armijo.txt'
+        elif line_search_method == 'Wolfe':
+            outputfile = 'result/' + Objname + '_' + method + '_Wolfe.txt'
         Obj.outputfile = outputfile
         myobj.printinfo()
         
@@ -96,13 +92,13 @@ def runcase(Obj, xinit, casenumber = 1, Objname = 'OptObj', methodlist = ['BFGS'
         
     
     # Write the latex table code in one txt file
-    with open('result/' + Objname + '_table.txt', 'w') as f:
+    with open('result/' + Objname + ' ' + line_search_method + '_table.txt', 'w') as f:
         f.write("\\begin{table}[htpb]\n")
         f.write("\\centering\n")
         f.write("\\caption{" + Objname + "}\n")
-        f.write("\\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}\n")
+        f.write("\\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}\n")
         f.write("\\hline\n")
-        f.write(" Method & $f_{\\text{val}}$ & $||\\nabla f||$ &  Iter & Runtime & Converge Reason & Other info \\\\\n")
+        f.write(" Method & $f_{\\text{val}}$ & $||\\nabla f||$ &  Iter & Runtime \\\\\n")
         f.write("\\hline\n")
         
         for outinfo in outinfo_list:
@@ -118,9 +114,11 @@ def runcase(Obj, xinit, casenumber = 1, Objname = 'OptObj', methodlist = ['BFGS'
             else:
                 otherinfo = str(otherinfo)
             
-            f.write(method + " & " + "{:.5e}".format(fval) + " & " + "{:.5e}".format(gradnorm) + " & " + str(iternum) + " & " + "{:.3e}".format(runtime) + " & " + converge_reason + " & " + otherinfo + " \\\\\n")
+            # name = split the method string by _
+            method = method.split('_')[0]
+            f.write(method + ' ' + line_search_method + " & " + "{:.5e}".format(fval) + " & " + "{:.5e}".format(gradnorm) + " & " + str(iternum) + " & " + "{:.3e}".format(runtime) + " \\\\\n")
         
         f.write("\\hline\n")
         f.write("\\end{tabular}\n")
         f.write("\\end{table}\n")
-        
+    

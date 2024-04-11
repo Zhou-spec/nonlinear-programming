@@ -450,7 +450,7 @@ def OptAlg(Obj, xinit, outputfile = None):
 
 
     myout = Optout(method, x, fk, np.linalg.norm(gk), iter, runtime, success, converge_rate, converge_reason, converge_info, outputfile, other)
-    myout.printinfo()
+    #myout.printinfo()
     
     return x, myout
 

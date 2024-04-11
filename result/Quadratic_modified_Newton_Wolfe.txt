@@ -1,0 +1,11 @@
+Iter	fval		||grad||	alpha		delta
+0	14.93364659	28.47907066	0.00000000
+1	-25.66283089	0.00000000	1.00000000	0.00000000
+
+Optimization output:
+If success: 1
+fval = -25.66283089
+gradnorm = 0.00000000
+iternum = 1
+runtime = 0.00110340 s
+Converge info = Converged since gradient tolerance

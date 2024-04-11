@@ -1,0 +1,15 @@
+\begin{table}[htpb]
+\centering
+\caption{Quadratic}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ Method & $f_{\text{val}}$ & $||\nabla f||$ &  Iter & Runtime & Converge Reason & Other info \\
+\hline
+gradient_descend & -9.71941e+00 & 3.11462e-01 & 1000 & 5.157e-01 & max iter & / \\
+BFGS & -2.56628e+01 & 9.18802e-07 & 28 & 1.726e-02 & ftol & 0 \\
+L-BFGS & -2.56628e+01 & 8.57984e-06 & 56 & 2.973e-02 & ftol & 0 \\
+Newton-CG & -2.56628e+01 & 1.44302e-08 & 2 & 2.000e-03 & ftol & 12 \\
+modified_Newton & -2.56628e+01 & 1.26345e-13 & 1 & 1.103e-03 & gtol & / \\
+\hline
+\end{tabular}
+\end{table}

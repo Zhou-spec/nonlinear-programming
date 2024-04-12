@@ -1,0 +1,15 @@
+\begin{table}[htpb]
+\centering
+\caption{p7}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ Method & $f_{\text{val}}$ & $||\nabla f||$ &  Iter & Runtime \\
+\hline
+gradient Armijo & 1.36984e-02 & 1.82221e-01 & 1000 & 4.302e-01 \\
+BFGS Armijo & 6.34526e-24 & 6.43523e-11 & 51 & 3.236e-02 \\
+L-BFGS Armijo & 2.36242e-23 & 1.55670e-10 & 68 & 3.966e-02 \\
+Newton-CG Armijo & 6.48280e-22 & 9.26093e-10 & 39 & 2.394e-02 \\
+modified Armijo & 2.41943e-20 & 1.85213e-09 & 37 & 2.300e-02 \\
+\hline
+\end{tabular}
+\end{table}

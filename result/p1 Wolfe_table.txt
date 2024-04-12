@@ -1,0 +1,15 @@
+\begin{table}[htpb]
+\centering
+\caption{p1}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+\hline
+ Method & $f_{\text{val}}$ & $||\nabla f||$ &  Iter & Runtime \\
+\hline
+gradient Wolfe & -1.42497e+00 & 3.58434e-05 & 49 & 2.793e-02 \\
+BFGS Wolfe & -1.42497e+00 & 5.90526e-07 & 19 & 1.472e-02 \\
+L-BFGS Wolfe & -1.42497e+00 & 4.24130e-06 & 15 & 1.014e-02 \\
+Newton-CG Wolfe & -1.42497e+00 & 1.39203e-09 & 5 & 5.298e-03 \\
+modified Wolfe & -1.42497e+00 & 1.80096e-14 & 1 & 2.003e-03 \\
+\hline
+\end{tabular}
+\end{table}

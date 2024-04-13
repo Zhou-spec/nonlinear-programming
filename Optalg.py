@@ -13,8 +13,8 @@ def ArmijoBacktracking(f, x, d, f0, grad, alphainit = 1.0,c1 = 1e-4, beta = 0.5,
     '''
     t = alphainit
     while True:
-        print(grad)
-        print(d)
+#        print(grad)
+#        print(d)
         if f(x + t*d) <= f0 + c1 * t * np.dot(grad, d):
             return t
         t *= beta
@@ -88,15 +88,17 @@ def WolfeBacktracking(f, gradfunc, x, d, alphainit = 1.0, c1 = 1e-4, c2 = 0.9, b
     return alpha
 
 
-def descend_direction(grad, hessian = None, method = 'gradient_descend', extrainfo = None):
+def descend_direction(grad, hessian = None, method_options = 'gradient_descend', extrainfo = None):
     # Extrainfo contains the information we store in each step, like B_k in BFGS and (s_i, y_i) in L-BFGS
-    delta = None
+    extra_output = None
     beta = 1e-4
-    if method == 'gradient_descend':
-        return -grad, delta
-    elif method == 'Newton':
-        return -np.linalg.solve(hessian, grad), delta
-    elif method == 'modified_Newton':
+    methodname = method_options.methodname
+    if methodname == 'gradient_descend':
+#        return -quad_grad, extra_output
+        return -grad, extra_output
+    elif methodname == 'Newton':
+        return -np.linalg.solve(hessian, grad), extra_output
+    elif methodname == 'modified_Newton':
         # Add a small positive diagonal term to the hessian to make it positive definite
         hessian_diag = np.diag(hessian)
         
@@ -116,21 +118,22 @@ def descend_direction(grad, hessian = None, method = 'gradient_descend', extrain
             
             # Solve for the descend direction
         p =  -np.linalg.solve(hessian_modified, grad)   
-        return p, delta    
+        
+        extra_output = delta
+        return p, extra_output   
     
-    elif method == 'BFGS':
+    elif methodname == 'BFGS':
 #        p = np.linalg.solve(extrainfo, -grad)
         p = -np.dot(extrainfo, grad)
-        return p, delta
+        return p, extra_output
     
-    elif method == 'L-BFGS':
+    elif methodname == 'L-BFGS':
         # Use two loop to compute the p
-        
         m = len(extrainfo)
         if m == 0:
             gamma = 1
             p = -grad
-            return p, delta
+            return p, extra_output
         
         sk = extrainfo[-1][0]
         yk = extrainfo[-1][1]
@@ -160,14 +163,29 @@ def descend_direction(grad, hessian = None, method = 'gradient_descend', extrain
             beta = rho * np.dot(yk, r)
             r = r + sk * (alpha - beta)
         p = -r
-        return p, delta
+        
+        return p, extra_output
     
-    elif method == 'Newton-CG':
+    elif methodname == 'Newton-CG':
         d = -grad
         j = 0                       # j: inner loop iteration number
         stop = False      # inner loop stop flag for CG method  
         z = np.zeros_like(d)
         r = grad
+        
+        eta_Newton = method_options.eta_newton
+        eta = eta_Newton
+        if eta_Newton == 'nonlinear':
+            # Criterion from O. Ghattas and K. Willcox Paper
+            alpha = method_options.alpha_newton
+            eta = np.min([np.linalg.norm(grad) ** alpha, 0.5])
+        elif eta_Newton == 'Eisenstat-Walker':
+            # Criterion from Eisenstat and Walker
+            oldfk, fk = extrainfo
+            alpha = method_options.alpha_newton
+            gamma = method_options.gamma_newton
+            eta = gamma * (np.abs(fk + 1e-8) ** alpha) / (np.abs(oldfk + 1e-8) ** alpha)
+        
         while not stop:
             hd = hessian @ d
             dThd = np.dot(d, hd)
@@ -187,29 +205,33 @@ def descend_direction(grad, hessian = None, method = 'gradient_descend', extrain
                 alpha = rnorm / dThd
                 z = z + alpha * d
                 r = r + alpha * hd
-                if np.linalg.norm(r) < 0.01 * np.linalg.norm(grad):
+                if np.linalg.norm(r) < eta * np.linalg.norm(grad):
                     p = z
                     stop = True
                 
                 beta = np.dot(r,r) / rnorm
                 d = -r + beta * d 
         
-        delta = j
-        return p, delta 
+        
+        
+        extra_output = eta
+        return p, extra_output
     
     else:
         print('Error: method not supported')
         return None
     
 
-def extrainfo_update(extrainfo, method, info_k):
+def extrainfo_update(extrainfo, method_options, info_k):
     # in extrainfo, we store the extra information we need for doing optimization
     # in info_k object, we will store the new information we gain from current iteration
     
     # For BFGS method, extrainfo refers to B_k, and info_k is {s_k, y_k}, which is saved as a 3-tuple
     # For L-BFGS method, extra info refers to {(s_{k-m}..., s_{k-1}), (y_{k-m}, ..., y_{k-1})}, and info_k is {s_k, y_k}
     
-    if method == 'BFGS':
+    methodname = method_options.methodname
+    
+    if methodname == 'BFGS':
         epsmin = 1e-8
         skip = False
     
@@ -231,7 +253,8 @@ def extrainfo_update(extrainfo, method, info_k):
         
         return newinfo, skip
     
-    if method == 'L-BFGS':
+    if methodname == 'L-BFGS':
+        m_LBFGS = method_options.m_LBFGS
         epsmin = 1e-8
         skip = False
     
@@ -245,7 +268,7 @@ def extrainfo_update(extrainfo, method, info_k):
             n = sk.size
             k = len(extrainfo)
 
-            if k < 10:
+            if k < m_LBFGS:
                 extrainfo.append([sk, yk])
             else:
                 extrainfo.append([sk, yk])
@@ -269,7 +292,6 @@ def OptAlg(Obj, xinit, outputfile = None):
     ftol = Obj.converge_options.ftol
     gtol = Obj.converge_options.gtol
     xtol = Obj.converge_options.xtol
-    method = Obj.method
     
     # Read linesearch_options
     linesearch_method = Obj.linesearch_options.method
@@ -278,63 +300,82 @@ def OptAlg(Obj, xinit, outputfile = None):
     c2 = Obj.linesearch_options.c2
     minstep = Obj.linesearch_options.minstep
     
+    # Read method options
+    method_options = Obj.method_options
+    methodname = method_options.methodname
+    
     
     starttime = time.time()
     
     iter = 0
     fk = f(x)
     gk = g(x)
+    oldfk = fk
+    
+    print("Gk:", gk)
     
     f0 = fk
     g0 = gk
     
     losslist = [fk]
     
-    if method == 'BFGS' or method == 'L-BFGS':
+    if methodname == 'BFGS' or methodname == 'L-BFGS':
         skiptime = 0
     else:    
         skiptime = None
     
-    if method == 'Newton-CG':
+    if methodname == 'Newton-CG':
         CGitertime = 0
         
     
-    if method == 'BFGS':
+    if methodname == 'BFGS':
         extrainfo = np.eye(dimension)
-    elif method == 'L-BFGS':
+    elif methodname == 'L-BFGS':
         extrainfo = []    
     
     
     # Make output
     
-    if method == 'modified_Newton':
-        print("Iter\tfval\t\t||grad||\talpha\t\tdelta")
+    
+    if methodname == 'modified_Newton':
+        print("Iter\tfval\t\t||grad||\talpha\t\tdelta\t\tfcal\t\tgcal\t\thcal")
+    elif methodname == 'Newton-CG':
+        print("Iter\tfval\t\t||grad||\talpha\t\teta\t\tfcal\t\tgcal\t\thcal")
     else:
-        print("Iter\tfval\t\t||grad||\talpha")
+        print("Iter\tfval\t\t||grad||\talpha\t\tfcal\t\tgcal\t\thcal")
     
     # If outputfile is not none, create a new file and write the header
     if outputfile is not None:
         with open(outputfile, 'w') as file:
-            if method == 'modified_Newton':
-                file.write("Iter\tfval\t\t||grad||\talpha\t\tdelta\n")
+            if methodname == 'modified_Newton':
+                file.write("Iter\tfval\t\t||grad||\talpha\t\tdelta\t\tfcal\t\tgcal\t\thcal\n")
+            elif methodname == 'Newton-CG':
+                file.write("Iter\tfval\t\t||grad||\talpha\t\tCGiter\t\tfcal\t\tgcal\t\thcal\n")
             else:
-                file.write("Iter\tfval\t\t||grad||\talpha\n")
+                file.write("Iter\tfval\t\t||grad||\talpha\t\tfcal\t\tgcal\t\thcal\n")
+    
+    
+    num_fcal = Obj.func_call
+    num_gcal = Obj.grad_call
+    num_hcal = Obj.hessian_call
             
-    print_output(iter, fk, np.linalg.norm(gk), 0, outputfile = outputfile)
+    print_output(iter, fk, np.linalg.norm(gk), 0, outputfile = outputfile, num_fcal = num_fcal, num_gradcal = num_gcal, num_hesscal = num_hcal)
     while True:
         
         iter = iter + 1
         # Find descend direction
-        if method == 'modified_Newton':
+        hk = None
+        if methodname == 'modified_Newton':
             hk = hessian(x)
-            pk, delta = descend_direction(gk, hk, method)
-        elif method == 'gradient_descend':
-            pk = descend_direction(gk)
+            pk, extra_output = descend_direction(gk, hk, method_options = method_options)
+            delta = extra_output
+        elif methodname == 'gradient_descend':
+            pk = descend_direction(gk, hessian = None, method_options = method_options)
             pk = pk[0]
         
-        elif method == 'Newton':
+        elif methodname == 'Newton':
             hk = hessian(x)
-            pk = descend_direction(gk, hk, method)
+            pk, extra_output = descend_direction(gk, hk, method_options)
             # Judge if pk is a descent direction
             
             if np.dot(pk, gk) > 0:
@@ -343,14 +384,19 @@ def OptAlg(Obj, xinit, outputfile = None):
                 success = 0
                 break
 #                pk = -gk
-        elif method == 'Newton-CG':
+        elif methodname == 'Newton-CG':
             hk = hessian(x)
-            pk, j = descend_direction(gk, hk, method)
-            CGitertime = CGitertime + j
+            newton_extrainfo = None
+            if method_options.eta_newton == 'Eisenstat-Walker':
+                newton_extrainfo = [oldfk, fk]
+            
+            
+            pk, extra_output = descend_direction(gk, hk, method_options, extrainfo = newton_extrainfo)
+            CGitertime = extra_output
             
         
-        elif method == 'BFGS' or 'L-BFGS':
-            pk, delta = descend_direction(gk, extrainfo = extrainfo, method = method)
+        elif methodname == 'BFGS' or methodname == 'L-BFGS':
+            pk, extra_output = descend_direction(gk, hessian = None, extrainfo = extrainfo, method_options = method_options)
             
             
     
@@ -382,21 +428,28 @@ def OptAlg(Obj, xinit, outputfile = None):
         
         losslist.append(fk)
         
-        if method == 'BFGS' or method == 'L-BFGS':
+        if methodname == 'BFGS' or methodname == 'L-BFGS':
             sk = alpha * pk
             yk = gk - oldgk
             info_k = (sk, yk)
-            extrainfo, skip = extrainfo_update(extrainfo, method, info_k)
+            extrainfo, skip = extrainfo_update(extrainfo, method_options, info_k)
             if skip:
                 skiptime = skiptime + 1
         
         
         
+        
         # Output
-        if method == 'modified_Newton':
-            print_output(iter, fk, np.linalg.norm(gk), alpha, delta, outputfile= outputfile)
+        num_fcal = Obj.func_call
+        num_gcal = Obj.grad_call
+        num_hcal = Obj.hessian_call
+    
+        if methodname == 'modified_Newton':
+            print_output(iter, fk, np.linalg.norm(gk), alpha, delta, outputfile= outputfile, num_fcal = num_fcal, num_gradcal = num_gcal, num_hesscal = num_hcal)
+        elif methodname == 'Newton-CG':
+            print_output(iter, fk, np.linalg.norm(gk), alpha, CGitertime, outputfile= outputfile, num_fcal = num_fcal, num_gradcal = num_gcal, num_hesscal = num_hcal)
         else:
-            print_output(iter, fk, np.linalg.norm(gk), alpha, outputfile= outputfile)
+            print_output(iter, fk, np.linalg.norm(gk), alpha, outputfile= outputfile, num_fcal = num_fcal, num_gradcal = num_gcal, num_hesscal = num_hcal)
             
         # Convergence check
         if np.linalg.norm(gk) < gtol * np.min([np.linalg.norm(g0), 1.0]):
@@ -440,16 +493,16 @@ def OptAlg(Obj, xinit, outputfile = None):
     alpha = np.log(en[2:] / en[1:-1]) / np.log(en[1:-1] / en[:-2])
     converge_rate = np.mean(alpha)
     
-    if method == 'BFGS' or method == 'L-BFGS':
+    if methodname == 'BFGS' or methodname == 'L-BFGS':
         other = skiptime
-    elif method == 'Newton-CG':
+    elif methodname == 'Newton-CG':
         other = CGitertime
     else:
         other = None
         
 
 
-    myout = Optout(method, x, fk, np.linalg.norm(gk), iter, runtime, success, converge_rate, converge_reason, converge_info, outputfile, other)
+    myout = Optout(methodname, x, fk, np.linalg.norm(gk), iter, runtime, success, converge_rate, converge_reason, converge_info, outputfile, other)
     #myout.printinfo()
     
     return x, myout

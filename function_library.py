@@ -171,3 +171,4 @@ def genhump_hess(dim, x):
     hess[-1, -1] = 8 * np.cos(2 * x[-1]) * np.power(np.sin(2 * x[-2]), 2) - 8 * np.power(np.sin(2 * x[-1]), 2) * np.sin(2 * x[-2]) * np.cos(2 * x[-2]) + 0.1
     hess[-1, -2] = 8 * np.sin(2 * x[-1]) * np.cos(2 * x[-1]) * np.sin(2 * x[-2]) * np.cos(2 * x[-2])
     return hess
+

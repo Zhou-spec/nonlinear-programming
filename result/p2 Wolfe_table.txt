@@ -5,11 +5,11 @@
 \hline
  Method & $f_{\text{val}}$ & $||\nabla f||$ &  Iter & Runtime \\
 \hline
-gradient Wolfe & -5.71919e-01 & 2.07119e-01 & 1000 & 5.775e-01 \\
-BFGS Wolfe & -5.76026e-01 & 3.16509e-09 & 14 & 8.527e-03 \\
-L-BFGS Wolfe & -5.76026e-01 & 2.99612e-05 & 28 & 1.552e-02 \\
-Newton-CG Wolfe & -5.76026e-01 & 9.34872e-14 & 3 & 2.508e-03 \\
-modified Wolfe & -5.76026e-01 & 2.04854e-12 & 1 & 1.504e-03 \\
+gradient Wolfe & -1.91375e+00 & 3.03082e-01 & 1000 & 9.933e-01 \\
+BFGS Wolfe & -1.92475e+00 & 1.21582e-10 & 14 & 1.446e-02 \\
+L-BFGS Wolfe & -1.92475e+00 & 9.89029e-06 & 29 & 3.005e-02 \\
+Newton-CG Wolfe & -1.92475e+00 & 1.63342e-13 & 2 & 2.706e-03 \\
+modified Wolfe & -1.92475e+00 & 7.75394e-13 & 1 & 1.354e-03 \\
 \hline
 \end{tabular}
 \end{table}

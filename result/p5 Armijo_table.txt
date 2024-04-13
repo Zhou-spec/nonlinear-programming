@@ -5,11 +5,11 @@
 \hline
  Method & $f_{\text{val}}$ & $||\nabla f||$ &  Iter & Runtime \\
 \hline
-gradient Armijo & 3.89491e-21 & 8.82599e-11 & 23 & 3.353e-02 \\
-BFGS Armijo & 4.89570e-25 & 9.89515e-13 & 27 & 2.800e-02 \\
-L-BFGS Armijo & 1.42548e-21 & 5.33944e-11 & 24 & 2.500e-02 \\
-Newton-CG Armijo & 1.18554e-21 & 4.86938e-11 & 23 & 2.103e-02 \\
-modified Armijo & 2.52220e-22 & 2.24597e-11 & 16 & 3.257e-02 \\
+gradient Armijo & 3.53838e-22 & 2.66022e-11 & 29 & 5.729e-02 \\
+BFGS Armijo & 1.74450e-20 & 1.86788e-10 & 26 & 4.234e-02 \\
+L-BFGS Armijo & 1.59638e-20 & 1.78683e-10 & 26 & 5.270e-02 \\
+Newton-CG Armijo & 8.54279e-20 & 4.13347e-10 & 25 & 4.079e-02 \\
+modified Armijo & 1.29165e-21 & 5.08262e-11 & 15 & 3.845e-02 \\
 \hline
 \end{tabular}
 \end{table}

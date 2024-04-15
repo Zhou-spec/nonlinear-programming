@@ -1,21 +1,23 @@
 \begin{table}[htpb]
 \centering
 \caption{p1}
-\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
 \hline
- Method & $f_{\text{val}}$ & $||\nabla f||$ &  Iter & Runtime \\
+ Method & Linesearch Method & $f_{\text{val}}$ & $||\nabla f||$ &  Iter & Runtime \\
 \hline
-gradient Armijo & 4.58513e-07 & 8.42759e-04 & 11157 & 3.468e+00 \\
-gradient Armijo & 4.58513e-07 & 8.42759e-04 & 11157 & 3.484e+00 \\
-modified Armijo & 4.21593e-15 & 9.88783e-07 & 39 & 3.274e-02 \\
-modified Armijo & 4.21593e-15 & 9.88783e-07 & 39 & 2.451e-02 \\
-Newton-CG Armijo & 2.62434e-13 & 1.32214e-05 & 39 & 3.217e-02 \\
-Newton-CG Armijo & 2.62434e-13 & 1.32214e-05 & 39 & 3.091e-02 \\
-Newton-CG Armijo & 5.35507e-12 & 1.76979e-05 & 115 & 6.720e-02 \\
-BFGS Armijo & 1.79047e-15 & 2.26339e-06 & 93 & 3.909e-02 \\
-BFGS Armijo & 1.79047e-15 & 2.26339e-06 & 93 & 4.397e-02 \\
-L-BFGS Armijo & 2.48015e-14 & 8.39926e-06 & 100 & 5.149e-02 \\
-L-BFGS Armijo & 2.48015e-14 & 8.39926e-06 & 100 & 6.205e-02 \\
+gradient & Armijo & 4.58513e-07 & 8.42759e-04 & 11157 & 3.768e+00 \\
+gradient & Armijo & 4.58513e-07 & 8.42759e-04 & 11157 & 3.813e+00 \\
+modified & Armijo & 4.21593e-15 & 9.88783e-07 & 39 & 2.673e-02 \\
+modified & Armijo & 4.21593e-15 & 9.88783e-07 & 39 & 2.470e-02 \\
+Newton-CG & Armijo & 2.62434e-13 & 1.32214e-05 & 39 & 2.892e-02 \\
+Newton-CG & Armijo & 2.62434e-13 & 1.32214e-05 & 39 & 3.369e-02 \\
+Newton-CG & Armijo & 5.35507e-12 & 1.76979e-05 & 115 & 7.385e-02 \\
+BFGS & Armijo & 1.79047e-15 & 2.26339e-06 & 93 & 4.191e-02 \\
+BFGS & Armijo & 1.79047e-15 & 2.26339e-06 & 93 & 4.296e-02 \\
+L-BFGS & Armijo & 2.48015e-14 & 8.39926e-06 & 100 & 5.820e-02 \\
+L-BFGS & Armijo & 2.48015e-14 & 8.39926e-06 & 100 & 5.856e-02 \\
+DFP & Armijo & 5.00022e-01 & 1.50337e+00 & 1000 & 3.420e-01 \\
+DFP & Armijo & 5.00022e-01 & 1.50337e+00 & 1000 & 3.459e-01 \\
 \hline
 \end{tabular}
 \end{table}

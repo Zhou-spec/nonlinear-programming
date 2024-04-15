@@ -317,9 +317,43 @@ def print_output(iternum, fval, gradnorm, currentalpha, delta = None, outputfile
 
 class Optout():
     # Summarize the output of the optimization algorithm
-    def __init__(self, method, x, fval, gradnorm, iternum, runtime, success = 1, converge_rate = None, converge_reason = '', message = '', outputfile = None, other = None):
-        self.x = x
-        self.method = method
+    def __init__(self, method_options, x, fval, gradnorm, iternum, runtime, success = 1, converge_rate = None, converge_reason = '', message = '', outputfile = None, other = None, linesearch_method = 'Armijo', fcal = 0, gcal = 0, hcal = 0):
+        '''
+        Other info:
+            For 
+        '''
+
+#        self.method_options = method_options
+        # Use method_options to find a name for the output info
+        
+        methodname = method_options.methodname
+        if methodname == 'gradient_descend':
+            short_methodname = 'GraDes'
+        elif methodname == 'modified_Newton':
+            short_methodname = 'ModNew'
+        elif methodname == 'Newton-CG':
+            short_methodname = 'NewCG'
+#                eta_Newton = myobj.method_options.eta_newton
+            eta_Newton = method_options.eta_newton
+            if eta_Newton == 'nonlinear':
+                short_methodname = short_methodname + 'N'
+            elif eta_Newton == 'Eisenstat-Walker':
+                short_methodname = short_methodname + 'EW'
+            else:
+                short_methodname = short_methodname + 'C'
+        else:
+            short_methodname = methodname
+        
+        if linesearch_method == 'Armijo':
+            short_methodname = short_methodname + '_A'
+            
+        elif linesearch_method == 'Wolfe':
+            short_methodname = short_methodname + '_W'
+    
+        
+        self.x = x        
+        self.methodname = short_methodname
+        self.linesearch_method = linesearch_method
         self.fval = fval
         self.gradnorm = gradnorm
         self.iternum = iternum
@@ -329,12 +363,18 @@ class Optout():
         self.converge_rate = converge_rate
         self.converge_reason = converge_reason
         self.outputfile = outputfile
+        self.fcal = fcal
+        self.gcal = gcal
+        self.hcal = hcal
         self.other = other
         
         
     def printinfo(self):
         print("\n")
-        print("Algorithm: ", self.method)
+        
+        method = self.methodname
+        print("Algorithm: ", method)
+        print("Line search method: ", self.linesearch_method)
         print('Optimization output:')
         print("If success:", self.success)
         print('fval = ', self.fval)
@@ -342,6 +382,7 @@ class Optout():
         print('iternum = ', self.iternum)
         print("runtime = ", self.runtime, "s")
         print('converge info = ', self.message)
+        print("function call :", (self.fcal, self.gcal, self.hcal))
 
         if self.method == 'BFGS' or self.method == 'L-BFGS':
             print("skip time = ", self.other)
@@ -350,11 +391,14 @@ class Optout():
             with open(self.outputfile, 'a') as f:
                 f.write("\n")
                 f.write('Optimization output:\n')
+                f.write("Algorithm: %s\n" % method)
+                f.write("Line search method: %s\n" % self.linesearch_method)
                 f.write("If success: %d\n" % self.success)
                 f.write('fval = %.8f\n' % self.fval)
                 f.write('gradnorm = %.8f\n' % self.gradnorm)
                 f.write('iternum = %d\n' % self.iternum)
                 f.write("runtime = %.8f s\n" % self.runtime)
                 f.write('Converge info = %s\n' % self.message)
+                f.write("function call : (%d, %d, %d)\n" % (self.fcal, self.gcal, self.hcal))
                 if self.method == 'BFGS' or self.method == 'L-BFGS':
                     f.write('skip time = %s\n' % self.other)

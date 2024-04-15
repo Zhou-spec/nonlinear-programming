@@ -37,8 +37,8 @@ def WolfeBacktracking(f, gradfunc, x, d, alphainit = 1.0, c1 = 1e-4, c2 = 0.9, b
     
     f0 = f(x)
     g0 = gradfunc(x)
-    print(g0)
-    print(d)
+#    print(g0)
+#    print(d)
     gp = np.dot(g0, d)
 #    print(gp, c1, c2, beta)
     if gp >= 0:
@@ -122,7 +122,7 @@ def descend_direction(grad, hessian = None, method_options = 'gradient_descend',
         extra_output = delta
         return p, extra_output   
     
-    elif methodname == 'BFGS':
+    elif methodname == 'BFGS' or methodname == 'DFP':
 #        p = np.linalg.solve(extrainfo, -grad)
         p = -np.dot(extrainfo, grad)
         return p, extra_output
@@ -226,10 +226,34 @@ def extrainfo_update(extrainfo, method_options, info_k):
     # in extrainfo, we store the extra information we need for doing optimization
     # in info_k object, we will store the new information we gain from current iteration
     
-    # For BFGS method, extrainfo refers to B_k, and info_k is {s_k, y_k}, which is saved as a 3-tuple
+    # For DFP method, extrainfo refers to H_k, and info_k is {s_k, y_k}, which is saved as a 3-tuple
+    # For BFGS method, extrainfo refers to H_k, and info_k is {s_k, y_k}, which is saved as a 3-tuple
     # For L-BFGS method, extra info refers to {(s_{k-m}..., s_{k-1}), (y_{k-m}, ..., y_{k-1})}, and info_k is {s_k, y_k}
     
+    
     methodname = method_options.methodname
+    
+    if methodname == 'DFP':
+        epsmin = 1e-8
+        skip = False
+        
+        sk = info_k[0]; yk = info_k[1]
+        n = sk.size
+        
+        # Judge if we need to skip the updates
+        sy = np.dot(yk, sk)
+        
+        if sy <= epsmin * np.linalg.norm(yk) * np.linalg.norm(sk):
+            newinfo = extrainfo
+            skip = True
+        else:
+            # Do DFP update
+            Hy = extrainfo @ yk
+            yTHy = np.dot(yk, Hy)
+            newinfo = extrainfo + np.outer(sk, sk) / sy - np.outer(Hy, Hy) / yTHy
+            
+        return newinfo, skip
+            
     
     if methodname == 'BFGS':
         epsmin = 1e-8
@@ -319,7 +343,7 @@ def OptAlg(Obj, xinit, outputfile = None):
     
     losslist = [fk]
     
-    if methodname == 'BFGS' or methodname == 'L-BFGS':
+    if methodname == 'BFGS' or methodname == 'L-BFGS' or methodname == 'DFP':
         skiptime = 0
     else:    
         skiptime = None
@@ -328,10 +352,11 @@ def OptAlg(Obj, xinit, outputfile = None):
         CGitertime = 0
         
     
-    if methodname == 'BFGS':
+    if methodname == 'BFGS' or methodname == 'DFP':
         extrainfo = np.eye(dimension)
     elif methodname == 'L-BFGS':
         extrainfo = []    
+    
     
     
     # Make output
@@ -395,7 +420,7 @@ def OptAlg(Obj, xinit, outputfile = None):
             CGitertime = extra_output
             
         
-        elif methodname == 'BFGS' or methodname == 'L-BFGS':
+        elif methodname == 'BFGS' or methodname == 'L-BFGS' or methodname == 'DFP':
             pk, extra_output = descend_direction(gk, hessian = None, extrainfo = extrainfo, method_options = method_options)
             
             
@@ -410,10 +435,11 @@ def OptAlg(Obj, xinit, outputfile = None):
         elif linesearch_method == 'Wolfe':
             alphainit = Obj.linesearch_options.alpha
             
-
         if linesearch_method == 'Armijo':
+#            print("Current line search method: ", linesearch_method)
             alpha = ArmijoBacktracking(f, x, pk, fk, gk, alphainit = alphainit, c1 = c1, beta = beta, minstep = minstep)
         elif linesearch_method == 'Wolfe':
+#            print("Current line search method: ", linesearch_method)
             alpha = WolfeBacktracking(f, g, x, pk, alphainit = alphainit, c1 = c1, c2 = c2, maxiter = 200)
         
         # Update x
@@ -493,7 +519,7 @@ def OptAlg(Obj, xinit, outputfile = None):
     alpha = np.log(en[2:] / en[1:-1]) / np.log(en[1:-1] / en[:-2])
     converge_rate = np.mean(alpha)
     
-    if methodname == 'BFGS' or methodname == 'L-BFGS':
+    if methodname == 'BFGS' or methodname == 'L-BFGS' or 'DFP':
         other = skiptime
     elif methodname == 'Newton-CG':
         other = CGitertime
@@ -501,8 +527,12 @@ def OptAlg(Obj, xinit, outputfile = None):
         other = None
         
 
-
-    myout = Optout(methodname, x, fk, np.linalg.norm(gk), iter, runtime, success, converge_rate, converge_reason, converge_info, outputfile, other)
+    fcal = Obj.func_call
+    gcal = Obj.grad_call
+    hcal = Obj.hessian_call
+    
+    print("num of calls:", fcal, gcal, hcal)
+    myout = Optout(method_options, x, fk, np.linalg.norm(gk), iter, runtime, success, converge_rate, converge_reason, converge_info, outputfile, other, linesearch_method = linesearch_method, fcal = fcal, gcal = gcal, hcal = hcal)
     #myout.printinfo()
     
     return x, myout

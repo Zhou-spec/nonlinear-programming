@@ -1,15 +1,23 @@
 \begin{table}[htpb]
 \centering
 \caption{p2}
-\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
 \hline
- Method & $f_{\text{val}}$ & $||\nabla f||$ &  Iter & Runtime \\
+ Method & Linesearch Method & $f_{\text{val}}$ & $||\nabla f||$ &  Iter & Runtime \\
 \hline
-gradient Wolfe & -1.91375e+00 & 3.03082e-01 & 1000 & 9.933e-01 \\
-BFGS Wolfe & -1.92475e+00 & 1.21582e-10 & 14 & 1.446e-02 \\
-L-BFGS Wolfe & -1.92475e+00 & 9.89029e-06 & 29 & 3.005e-02 \\
-Newton-CG Wolfe & -1.92475e+00 & 1.63342e-13 & 2 & 2.706e-03 \\
-modified Wolfe & -1.92475e+00 & 7.75394e-13 & 1 & 1.354e-03 \\
+gradient & Wolfe & -1.26209e+00 & 3.50998e-02 & 2864 & 7.026e-01 \\
+gradient & Wolfe & -1.25123e+00 & 4.64782e-01 & 2055 & 8.775e-01 \\
+modified & Wolfe & -1.26233e+00 & 1.25838e-12 & 1 & 8.887e-03 \\
+modified & Wolfe & -1.26233e+00 & 1.25838e-12 & 1 & 1.442e-03 \\
+Newton-CG & Wolfe & -1.26233e+00 & 5.54990e-03 & 6 & 5.595e-03 \\
+Newton-CG & Wolfe & -1.26233e+00 & 1.08087e-12 & 2 & 2.143e-03 \\
+Newton-CG & Wolfe & -1.26233e+00 & 2.17819e-05 & 13 & 6.660e-03 \\
+BFGS & Wolfe & -1.26233e+00 & 7.34901e-03 & 23 & 9.386e-03 \\
+BFGS & Wolfe & -1.26233e+00 & 1.80484e-05 & 13 & 8.648e-03 \\
+L-BFGS & Wolfe & -1.26233e+00 & 4.41656e-02 & 30 & 2.102e-02 \\
+L-BFGS & Wolfe & -1.26233e+00 & 1.81483e-02 & 24 & 1.256e-02 \\
+DFP & Wolfe & -1.26209e+00 & 3.50998e-02 & 2864 & 6.973e-01 \\
+DFP & Wolfe & -1.25123e+00 & 4.64782e-01 & 2055 & 8.874e-01 \\
 \hline
 \end{tabular}
 \end{table}

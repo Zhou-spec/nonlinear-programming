@@ -384,8 +384,13 @@ def OptAlg(Obj, xinit, outputfile = None):
     num_fcal = Obj.func_call
     num_gcal = Obj.grad_call
     num_hcal = Obj.hessian_call
-            
-    print_output(iter, fk, np.linalg.norm(gk), 0, outputfile = outputfile, num_fcal = num_fcal, num_gradcal = num_gcal, num_hesscal = num_hcal)
+    
+    if methodname == 'modified_Newton':
+        print_output(iter, fk, np.linalg.norm(gk), 0, 0, outputfile = outputfile, num_fcal = num_fcal, num_gradcal = num_gcal, num_hesscal = num_hcal)
+    elif methodname == 'Newton-CG':
+        print_output(iter, fk, np.linalg.norm(gk), 0, 0, outputfile = outputfile, num_fcal = num_fcal, num_gradcal = num_gcal, num_hesscal = num_hcal)
+    else:
+        print_output(iter, fk, np.linalg.norm(gk), 0, outputfile = outputfile, num_fcal = num_fcal, num_gradcal = num_gcal, num_hesscal = num_hcal)
     while True:
         
         iter = iter + 1

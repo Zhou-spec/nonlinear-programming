@@ -318,6 +318,7 @@ def OptAlg(Obj, xinit, outputfile = None):
     xtol = Obj.converge_options.xtol
     
     # Read linesearch_options
+    linesearch_options = Obj.linesearch_options
     linesearch_method = Obj.linesearch_options.method
     beta = Obj.linesearch_options.beta
     c1 = Obj.linesearch_options.c1
@@ -532,7 +533,7 @@ def OptAlg(Obj, xinit, outputfile = None):
     hcal = Obj.hessian_call
     
     print("num of calls:", fcal, gcal, hcal)
-    myout = Optout(method_options, x, fk, np.linalg.norm(gk), iter, runtime, success, converge_rate, converge_reason, converge_info, outputfile, other, linesearch_method = linesearch_method, fcal = fcal, gcal = gcal, hcal = hcal)
+    myout = Optout(method_options, linesearch_options, x, fk, np.linalg.norm(gk), iter, runtime, success, converge_rate, converge_reason, converge_info, outputfile, other, fcal = fcal, gcal = gcal, hcal = hcal)
     #myout.printinfo()
     
     return x, myout

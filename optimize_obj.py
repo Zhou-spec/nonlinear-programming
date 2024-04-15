@@ -299,25 +299,55 @@ def genhump_obj(dim):
 
 
 
+def find_shortname(method_options, linesearch_options):
+    methodname = method_options.methodname
+    if methodname == 'gradient_descend':
+        short_methodname = 'GraDes'
+    elif methodname == 'modified_Newton':
+        short_methodname = 'ModNew'
+    elif methodname == 'Newton-CG':
+        short_methodname = 'NCG'
+#                eta_Newton = myobj.method_options.eta_newton
+        eta_Newton = method_options.eta_newton
+        if eta_Newton == 'nonlinear':
+            short_methodname = short_methodname + 'N'
+        elif eta_Newton == 'Eisenstat-Walker':
+            short_methodname = short_methodname + 'EW'
+        else:
+            short_methodname = short_methodname + 'C'
+    else:
+        short_methodname = methodname
+    
+    linesearch_method = linesearch_options.method
+    
+    if linesearch_method == 'Armijo':
+        short_methodname = short_methodname + '-A'
+        
+    elif linesearch_method == 'Wolfe':
+        short_methodname = short_methodname + '-W'
+        
+    return short_methodname
+
+
 ##############################################################################################
 
 def print_output(iternum, fval, gradnorm, currentalpha, delta = None, outputfile = None, num_fcal = None, num_gradcal = None, num_hesscal = None):
     if delta is None:
-        print("%d\t%.8f\t%.8f\t%.8f\t\t%d\t\t%d\t\t%d" % (iternum, fval, gradnorm, currentalpha, num_fcal, num_gradcal, num_hesscal))
+        print("%d\t%.8e\t%.8e\t%.8e\t\t%d\t\t%d\t\t%d" % (iternum, fval, gradnorm, currentalpha, num_fcal, num_gradcal, num_hesscal))
     else:
-        print("%d\t%.8f\t%.8f\t%.8f\t%.8f\t\t%d\t\t%d\t\t%d" % (iternum, fval, gradnorm, currentalpha, delta, num_fcal, num_gradcal, num_hesscal))
+        print("%d\t%.8e\t%.8e\t%.8e\t%.8e\t\t%d\t\t%d\t\t%d" % (iternum, fval, gradnorm, currentalpha, delta, num_fcal, num_gradcal, num_hesscal))
         
     if outputfile is not None:
         with open(outputfile, 'a') as f:
             if delta is None:
-                f.write("%d\t%.8f\t%.8f\t%.8f\t\t%d\t\t%d\t\t%d\n" % (iternum, fval, gradnorm, currentalpha, num_fcal, num_gradcal, num_hesscal))
+                f.write("%d\t%.8e\t%.8e\t%.8e\t\t%d\t\t%d\t\t%d\n" % (iternum, fval, gradnorm, currentalpha, num_fcal, num_gradcal, num_hesscal))
             else:
-                f.write("%d\t%.8f\t%.8f\t%.8f\t%.8f\t\t%d\t\t%d\t\t%d\n" % (iternum, fval, gradnorm, currentalpha, delta, num_fcal, num_gradcal, num_hesscal))
+                f.write("%d\t%.8e\t%.8e\t%.8e\t%.8e\t\t%d\t\t%d\t\t%d\n" % (iternum, fval, gradnorm, currentalpha, delta, num_fcal, num_gradcal, num_hesscal))
 
 
 class Optout():
     # Summarize the output of the optimization algorithm
-    def __init__(self, method_options, x, fval, gradnorm, iternum, runtime, success = 1, converge_rate = None, converge_reason = '', message = '', outputfile = None, other = None, linesearch_method = 'Armijo', fcal = 0, gcal = 0, hcal = 0):
+    def __init__(self, method_options, linesearch_options, x, fval, gradnorm, iternum, runtime, success = 1, converge_rate = None, converge_reason = '', message = '', outputfile = None, other = None, fcal = 0, gcal = 0, hcal = 0):
         '''
         Other info:
             For 
@@ -326,34 +356,11 @@ class Optout():
 #        self.method_options = method_options
         # Use method_options to find a name for the output info
         
-        methodname = method_options.methodname
-        if methodname == 'gradient_descend':
-            short_methodname = 'GraDes'
-        elif methodname == 'modified_Newton':
-            short_methodname = 'ModNew'
-        elif methodname == 'Newton-CG':
-            short_methodname = 'NewCG'
-#                eta_Newton = myobj.method_options.eta_newton
-            eta_Newton = method_options.eta_newton
-            if eta_Newton == 'nonlinear':
-                short_methodname = short_methodname + 'N'
-            elif eta_Newton == 'Eisenstat-Walker':
-                short_methodname = short_methodname + 'EW'
-            else:
-                short_methodname = short_methodname + 'C'
-        else:
-            short_methodname = methodname
-        
-        if linesearch_method == 'Armijo':
-            short_methodname = short_methodname + '_A'
-            
-        elif linesearch_method == 'Wolfe':
-            short_methodname = short_methodname + '_W'
+        short_methodname = find_shortname(method_options, linesearch_options)
     
-        
         self.x = x        
         self.methodname = short_methodname
-        self.linesearch_method = linesearch_method
+        self.linesearch_method = linesearch_options.method
         self.fval = fval
         self.gradnorm = gradnorm
         self.iternum = iternum
@@ -394,10 +401,10 @@ class Optout():
                 f.write("Algorithm: %s\n" % method)
                 f.write("Line search method: %s\n" % self.linesearch_method)
                 f.write("If success: %d\n" % self.success)
-                f.write('fval = %.8f\n' % self.fval)
-                f.write('gradnorm = %.8f\n' % self.gradnorm)
+                f.write('fval = %.8e\n' % self.fval)
+                f.write('gradnorm = %.8e\n' % self.gradnorm)
                 f.write('iternum = %d\n' % self.iternum)
-                f.write("runtime = %.8f s\n" % self.runtime)
+                f.write("runtime = %.8e s\n" % self.runtime)
                 f.write('Converge info = %s\n' % self.message)
                 f.write("function call : (%d, %d, %d)\n" % (self.fcal, self.gcal, self.hcal))
                 if self.method == 'BFGS' or self.method == 'L-BFGS':

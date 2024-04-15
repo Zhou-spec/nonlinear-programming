@@ -28,9 +28,9 @@ from decimal import Decimal
 # A list of possible options
 
 
-ftol = 1e-6
-gtol = 1e-6
-xtol = 1e-6
+ftol = 1e-7
+gtol = 1e-7
+xtol = 1e-7
 gradient_descend_options = {"optimization_method": "gradient_descend", "linesearch_method": "Armijo", "maxiter": 20000, "ftol": ftol, "gtol": gtol, "xtol":xtol, "alpha": 1, "beta": 0.5, "c1": 1e-4}
 gradient_descend_W_options = {"optimization_method": "gradient_descend", "linesearch_method": "Wolfe", "maxiter": 20000,  "ftol": ftol, "gtol": gtol, "xtol":xtol, "alpha": 1, "beta": 0.5, "c1": 1e-4, "c2": 0.9}
 
@@ -61,6 +61,8 @@ DFP_W_options = {"optimization_method": "DFP", "linesearch_method": "Wolfe", "ma
 optionslist = [gradient_descend_options, gradient_descend_W_options, modified_Newton_options, modified_Newton_W_options, Newton_CG_options, Newton_CG_W_options, Newton_CG_W_nonlinear_options, Newton_CG_W_EW_options, BFGS_options, BFGS_W_options, L_BFGS_options, L_BFGS_W_options, DFP_options, DFP_W_options]
 
 
+    
+    
 
 def runcase(Obj, xinit, Objname = 'OptObj', optionslist = optionslist, make_table = True):
     # Run the optimization for one Obj using three methods: gradient descend, Newton, modified Newton
@@ -81,10 +83,9 @@ def runcase(Obj, xinit, Objname = 'OptObj', optionslist = optionslist, make_tabl
         #myobj.method = method
         #myobj.linesearch_options.method = line_search_method 
         
-        if linesearch_method == 'Armijo':
-            outputfile = 'result/' + Objname + '_' + method + '_Armijo.txt'
-        elif linesearch_method == 'Wolfe':
-            outputfile = 'result/' + Objname + '_' + method + '_Wolfe.txt'
+        short_methodname = find_shortname(myobj.method_options, myobj.linesearch_options)
+        
+        outputfile = 'result/' + Objname + '_' + short_methodname  + '.txt'
         Obj.outputfile = outputfile
         myobj.printinfo()
         myobj.reset_call()
@@ -109,7 +110,7 @@ def runcase(Obj, xinit, Objname = 'OptObj', optionslist = optionslist, make_tabl
         print("\\caption{" + Objname + "}")
         print("\\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}")
         print("\\hline")
-        print(" Name & $f_{\\text{val}}$ & $||\\nabla f||$ &  Iter & Runtime & \# Call & Reason & Other info \\\\")
+        print(" Name & $f_{\\text{val}}$ & $||\\nabla f||$ &  Iter & Runtime & \# Call & Reason & Other\\\\")
         print("\\hline")
         
         
@@ -138,13 +139,13 @@ def runcase(Obj, xinit, Objname = 'OptObj', optionslist = optionslist, make_tabl
         
     
     # Write the latex table code in one txt file
-    with open('result/' + Objname + ' ' + linesearch_method + '_table.txt', 'w') as f:
+    with open('result/' + 'table_' + Objname  + '.txt', 'w') as f:
         f.write("\\begin{table}[htpb]\n")
         f.write("\\centering\n")
         f.write("\\caption{" + Objname + "}\n")
         f.write("\\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}\n")
         f.write("\\hline\n")
-        f.write(" Name & $f_{\\text{val}}$ & $||\\nabla f||$ &  Iter & Runtime & \# Call & Reason & Other info \\\\")
+        f.write(" Name & $f_{\\text{val}}$ & $||\\nabla f||$ &  Iter & Runtime & \# Call & Reason & Other\\\\")
         f.write("\\hline\n")
         
         for outinfo in outinfo_list:
@@ -162,8 +163,8 @@ def runcase(Obj, xinit, Objname = 'OptObj', optionslist = optionslist, make_tabl
                 otherinfo = '/'
             else:
                 otherinfo = str(otherinfo)
-                
-            f.write(name + " & " + "{:.5e}".format(fval) + " & " + "{:.5e}".format(gradnorm) + " & " + str(iternum) + " & " + "{:.3e}".format(runtime) + "({},{},{})".format(fcal, gcal, hcal) + " & " + converge_reason + " \\\\\n")
+            
+            f.write(name + " & " + "{:.5e}".format(fval) + " & " + "{:.5e}".format(gradnorm) + " & " + str(iternum) + " & " + "{:.3e}".format(runtime) + " & "+ "({},{},{})".format(fcal, gcal, hcal) + " & " + converge_reason + " & " + otherinfo + " \\\\\n")
         
         f.write("\\hline\n")
         f.write("\\end{tabular}\n")

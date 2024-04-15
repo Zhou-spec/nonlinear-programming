@@ -455,7 +455,7 @@ def OptAlg(Obj, xinit, outputfile = None):
         
         losslist.append(fk)
         
-        if methodname == 'BFGS' or methodname == 'L-BFGS':
+        if methodname == 'BFGS' or methodname == 'L-BFGS' or methodname == 'DFP':
             sk = alpha * pk
             yk = gk - oldgk
             info_k = (sk, yk)
